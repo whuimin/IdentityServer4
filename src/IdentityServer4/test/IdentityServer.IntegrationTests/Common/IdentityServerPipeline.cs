@@ -306,7 +306,7 @@ namespace IdentityServer.IntegrationTests.Common
             return BrowserClient.GetCookie(BaseUrl, IdentityServerConstants.DefaultCheckSessionCookieName);
         }
 
-        public string CreateAuthorizeUrl(
+        public string CreateAuthorizeUrl (
             string clientId = null,
             string responseType = null,
             string scope = null,
@@ -318,7 +318,7 @@ namespace IdentityServer.IntegrationTests.Common
             string responseMode = null,
             string codeChallenge = null,
             string codeChallengeMethod = null,
-            object extra = null)
+            Parameters extra = null)
         {
             var url = new RequestUrl(AuthorizeEndpoint).CreateAuthorizeUrl(
                 clientId: clientId,
@@ -353,7 +353,7 @@ namespace IdentityServer.IntegrationTests.Common
             string responseMode = null,
             string codeChallenge = null,
             string codeChallengeMethod = null,
-            object extra = null)
+            Parameters extra = null)
         {
             var old = BrowserClient.AllowAutoRedirect;
             BrowserClient.AllowAutoRedirect = false;

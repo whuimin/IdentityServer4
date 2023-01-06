@@ -37,7 +37,7 @@ namespace IdentityServer.UnitTests.Validation
 
             Func<Task> act = () => validator.ValidateAsync(null, null);
 
-            act.Should().Throw<ArgumentNullException>();
+            act.Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]

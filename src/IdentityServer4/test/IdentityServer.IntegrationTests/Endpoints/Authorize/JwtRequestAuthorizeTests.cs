@@ -8,10 +8,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IdentityModel;
+using IdentityModel.Client;
 using IdentityServer.IntegrationTests.Common;
 using IdentityServer4;
 using IdentityServer4.Configuration;
@@ -233,10 +235,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.LoginRequest.Should().NotBeNull();
@@ -281,10 +280,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.LoginRequest.Should().NotBeNull();
@@ -329,10 +325,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.LoginRequest.Should().NotBeNull();
@@ -379,10 +372,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.LoginRequest.Should().NotBeNull();
@@ -429,10 +419,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.ErrorMessage.Error.Should().Be("invalid_request_object");
@@ -470,12 +457,12 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
                 redirectUri: "bad",
                 acrValues: "bad",
                 loginHint: "bad",
-                extra: new
+                extra: new Parameters
                 {
-                    display = "bad",
-                    ui_locales = "bad",
-                    foo = "bad",
-                    request = requestJwt
+                    { "display", "bad" },
+                    { "ui_locales", "bad" },
+                    { "foo", "bad" },
+                    { "request", requestJwt }
                 });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -493,12 +480,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var someArr = new[] { "a", "b", "c" };
             var someArrJson = JsonConvert.SerializeObject(someArr);
 
-
-            var requestJwt = CreateRequestJwt(
-                issuer: _client.ClientId,
-                audience: IdentityServerPipeline.BaseUrl,
-                credential: new X509SigningCredentials(TestCert.Load()),
-                claims: new[] {
+            var claims = new[] {
                     new Claim("client_id", _client.ClientId),
                     new Claim("response_type", "id_token"),
                     new Claim("scope", "openid profile"),
@@ -511,16 +493,25 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
                     new Claim("ui_locales", "ui_locale_value"),
                     new Claim("foo", "123foo"),
                     new Claim("someObj", someObjJson, Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.Json),
-                    new Claim("someArr", someArrJson, Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.JsonArray),
-            });
+                    new Claim("someArr", someArrJson, Microsoft.IdentityModel.JsonWebTokens.JsonClaimValueTypes.JsonArray) };
+
+            var requestJwt = CreateRequestJwt(
+                issuer: _client.ClientId,
+                audience: IdentityServerPipeline.BaseUrl,
+                credential: new X509SigningCredentials(TestCert.Load()),
+                claims: claims
+            );
+
+            var parameters = new Parameters { { "request", requestJwt } };
+            foreach (var claim in claims)
+            {
+                parameters.Add(claim.Type, claim.Value);
+            }
 
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: parameters);
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.LoginRequest.Should().NotBeNull();
@@ -566,10 +557,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
 
             var url = _mockPipeline.CreateAuthorizeUrl(
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.ErrorMessage.Error.Should().Be("invalid_request");
@@ -601,10 +589,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.ErrorMessage.Error.Should().Be("invalid_request_object");
@@ -637,10 +622,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
 
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -674,10 +656,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
 
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -711,10 +690,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
 
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -748,10 +724,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
 
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -784,10 +757,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
 
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -821,10 +791,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: "client2",
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt
-                });
+                extra: new Parameters { { "request", requestJwt } });
 
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
@@ -867,10 +834,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request_uri = "http://client_jwt"
-                });
+                extra: new Parameters { { "request_uri", "http://client_jwt" } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
             _mockPipeline.ErrorWasCalled.Should().BeTrue();
 
@@ -910,11 +874,8 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
 
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
-                responseType: "id_token",
-                extra: new
-                {
-                    request_uri = "http://client_jwt"
-                });
+            responseType: "id_token",
+                extra: new Parameters { { "request_uri", "http://client_jwt" } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.LoginRequest.Should().NotBeNull();
@@ -967,10 +928,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request_uri = "http://client_jwt"
-                });
+                extra: new Parameters { { "request_uri", "http://client_jwt" } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.LoginRequest.Should().NotBeNull();
@@ -1022,10 +980,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request_uri = "http://client_jwt"
-                });
+                extra: new Parameters { { "request_uri", "http://client_jwt" } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.ErrorMessage.Error.Should().Be("invalid_request_uri");
@@ -1044,10 +999,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request_uri = "http://client_jwt"
-                });
+                extra: new Parameters { { "request_uri", "http://client_jwt" } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.ErrorWasCalled.Should().BeTrue();
@@ -1067,10 +1019,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request_uri = "http://client_jwt"
-                });
+                extra: new Parameters { { "request_uri", "http://client_jwt" } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
 
             _mockPipeline.ErrorWasCalled.Should().BeTrue();
@@ -1088,10 +1037,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request_uri = "http://" + new string('x', 512)
-                });
+                extra: new Parameters { { "request_uri", "http://" + new string('x', 512) } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
             _mockPipeline.ErrorWasCalled.Should().BeTrue();
             _mockPipeline.LoginRequest.Should().BeNull();
@@ -1128,11 +1074,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             var url = _mockPipeline.CreateAuthorizeUrl(
                 clientId: _client.ClientId,
                 responseType: "id_token",
-                extra: new
-                {
-                    request = requestJwt,
-                    request_uri = "http://client_jwt"
-                });
+                extra: new Parameters { { "request", requestJwt }, { "request_uri", "http://client_jwt" } });
             var response = await _mockPipeline.BrowserClient.GetAsync(url);
             _mockPipeline.ErrorWasCalled.Should().BeTrue();
             _mockPipeline.LoginRequest.Should().BeNull();

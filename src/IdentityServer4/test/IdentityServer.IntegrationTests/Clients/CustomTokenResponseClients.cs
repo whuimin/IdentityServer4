@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IdentityModel;
@@ -62,7 +63,7 @@ namespace IdentityServer.IntegrationTests.Clients
             fields.TryGetValue("token_type", out temp).Should().BeTrue();
             fields.TryGetValue("expires_in", out temp).Should().BeTrue();
 
-            var responseObject = fields["dto"] as JObject;
+            var responseObject = fields["dto"] as JsonElement?;
             responseObject.Should().NotBeNull();
 
             var responseDto = GetDto(responseObject);
@@ -127,7 +128,7 @@ namespace IdentityServer.IntegrationTests.Clients
             fields.TryGetValue("token_type", out temp).Should().BeFalse();
             fields.TryGetValue("expires_in", out temp).Should().BeFalse();
 
-            var responseObject = fields["dto"] as JObject;
+            var responseObject = fields["dto"] as JsonElement?;
             responseObject.Should().NotBeNull();
 
             var responseDto = GetDto(responseObject);
@@ -181,7 +182,7 @@ namespace IdentityServer.IntegrationTests.Clients
             fields.TryGetValue("token_type", out temp).Should().BeTrue();
             fields.TryGetValue("expires_in", out temp).Should().BeTrue();
 
-            var responseObject = fields["dto"] as JObject;
+            var responseObject = fields["dto"] as JsonElement?;
             responseObject.Should().NotBeNull();
 
             var responseDto = GetDto(responseObject);
@@ -252,7 +253,7 @@ namespace IdentityServer.IntegrationTests.Clients
             fields.TryGetValue("token_type", out temp).Should().BeFalse();
             fields.TryGetValue("expires_in", out temp).Should().BeFalse();
 
-            var responseObject = fields["dto"] as JObject;
+            var responseObject = fields["dto"] as JsonElement?;
             responseObject.Should().NotBeNull();
 
             var responseDto = GetDto(responseObject);
@@ -274,14 +275,49 @@ namespace IdentityServer.IntegrationTests.Clients
             response.RefreshToken.Should().BeNull();
         }
 
-        private CustomResponseDto GetDto(JObject responseObject)
+        private CustomResponseDto GetDto(JsonElement? responseObject)
         {
-            return responseObject.ToObject<CustomResponseDto>();
+            if (!responseObject.HasValue)
+            {
+                return null;
+            }
+            return responseObject.Value.Deserialize<CustomResponseDto>();
         }
 
         private Dictionary<string, object> GetFields(TokenResponse response)
         {
-            return response.Json.ToObject<Dictionary<string, object>>();
+            return response.Json.EnumerateObject().ToDictionary(je => je.Name, je => {
+                object value;
+                switch (je.Value.ValueKind)
+                {
+                    case JsonValueKind.Undefined:
+                        value= null;
+                        break;
+                    case JsonValueKind.Object:
+                        value = je.Value;
+                        break;
+                    case JsonValueKind.Array:
+                        value = je.Value;
+                        break;
+                    case JsonValueKind.String:
+                        value = je.Value.GetString();
+                        break;
+                    case JsonValueKind.Number:
+                        value = je.Value.GetInt64();
+                        break;
+                    case JsonValueKind.True:
+                    case JsonValueKind.False:
+                        value = je.Value.GetBoolean();
+						break;
+                    case JsonValueKind.Null:
+                        value = null;
+                        break;
+                    default:
+                        value = null;
+                        break;
+                }
+                return value;
+            });
         }
 
         private Dictionary<string, object> GetPayload(TokenResponse response)
