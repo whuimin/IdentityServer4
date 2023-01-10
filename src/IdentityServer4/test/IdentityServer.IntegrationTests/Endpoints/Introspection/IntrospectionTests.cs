@@ -15,8 +15,6 @@ using IdentityModel.Client;
 using IdentityServer.IntegrationTests.Endpoints.Introspection.Setup;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace IdentityServer.IntegrationTests.Endpoints.Introspection
@@ -122,7 +120,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 client_secret = "secret",
                 token = tokenResponse.AccessToken
             };
-            var json = JsonConvert.SerializeObject(data);
+            var json = JsonSerializer.Serialize(data);
 
             var client = new HttpClient(_handler);
             var response = await client.PostAsync(IntrospectionEndpoint, new StringContent(json, Encoding.UTF8, "application/json"));

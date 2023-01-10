@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FluentAssertions;
 using IdentityModel;
@@ -21,7 +22,6 @@ using IdentityServer4.Models;
 using IdentityServer4.Test;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using Xunit;
 
 namespace IdentityServer.IntegrationTests.Endpoints.Authorize
@@ -71,13 +71,13 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
                         {
                             // RSA key as JWK
                             Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                            Value = JsonConvert.SerializeObject(JsonWebKeyConverter.ConvertFromRSASecurityKey(_rsaKey))
+                            Value = JsonSerializer.Serialize(JsonWebKeyConverter.ConvertFromRSASecurityKey(_rsaKey))
                         },
                         new Secret
                         {
                             // x509 cert as JWK
                             Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                            Value = JsonConvert.SerializeObject(JsonWebKeyConverter.ConvertFromX509SecurityKey(new X509SecurityKey(TestCert.Load())))
+                            Value = JsonSerializer.Serialize(JsonWebKeyConverter.ConvertFromX509SecurityKey(new X509SecurityKey(TestCert.Load())))
                         }
                     },
 
@@ -115,13 +115,13 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
                         {
                             // RSA key as JWK
                             Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                            Value = JsonConvert.SerializeObject(JsonWebKeyConverter.ConvertFromRSASecurityKey(_rsaKey))
+                            Value = JsonSerializer.Serialize(JsonWebKeyConverter.ConvertFromRSASecurityKey(_rsaKey))
                         },
                         new Secret
                         {
                             // x509 cert as JWK
                             Type = IdentityServerConstants.SecretTypes.JsonWebKey,
-                            Value = JsonConvert.SerializeObject(JsonWebKeyConverter.ConvertFromX509SecurityKey(new X509SecurityKey(TestCert.Load())))
+                            Value = JsonSerializer.Serialize(JsonWebKeyConverter.ConvertFromX509SecurityKey(new X509SecurityKey(TestCert.Load())))
                         }
                     },
 
@@ -476,9 +476,9 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
         public async Task authorize_should_accept_complex_objects_in_request_object()
         {
             var someObj = new { foo = new { bar = "bar" }, baz = "baz" };
-            var someObjJson = JsonConvert.SerializeObject(someObj);
+            var someObjJson = JsonSerializer.Serialize(someObj);
             var someArr = new[] { "a", "b", "c" };
-            var someArrJson = JsonConvert.SerializeObject(someArr);
+            var someArrJson = JsonSerializer.Serialize(someArr);
 
             var claims = new[] {
                     new Claim("client_id", _client.ClientId),
@@ -517,19 +517,19 @@ namespace IdentityServer.IntegrationTests.Endpoints.Authorize
             _mockPipeline.LoginRequest.Should().NotBeNull();
 
             _mockPipeline.LoginRequest.Parameters["someObj"].Should().NotBeNull();
-            var someObj2 = JsonConvert.DeserializeObject(_mockPipeline.LoginRequest.Parameters["someObj"], someObj.GetType());
+            var someObj2 = JsonSerializer.Deserialize(_mockPipeline.LoginRequest.Parameters["someObj"], someObj.GetType());
             someObj.Should().BeEquivalentTo(someObj2);
             _mockPipeline.LoginRequest.Parameters["someArr"].Should().NotBeNull();
-            var someArr2 = JsonConvert.DeserializeObject<string[]>(_mockPipeline.LoginRequest.Parameters["someArr"]);
+            var someArr2 = JsonSerializer.Deserialize<string[]>(_mockPipeline.LoginRequest.Parameters["someArr"]);
             someArr2.Should().Contain(new[] { "a", "c", "b" });
             someArr2.Length.Should().Be(3);
 
             _mockPipeline.LoginRequest.RequestObjectValues.Count.Should().Be(13);
             _mockPipeline.LoginRequest.RequestObjectValues["someObj"].Should().NotBeNull();
-            someObj2 = JsonConvert.DeserializeObject(_mockPipeline.LoginRequest.RequestObjectValues["someObj"], someObj.GetType());
+            someObj2 = JsonSerializer.Deserialize(_mockPipeline.LoginRequest.RequestObjectValues["someObj"], someObj.GetType());
             someObj.Should().BeEquivalentTo(someObj2);
             _mockPipeline.LoginRequest.RequestObjectValues["someArr"].Should().NotBeNull();
-            someArr2 = JsonConvert.DeserializeObject<string[]>(_mockPipeline.LoginRequest.Parameters["someArr"]);
+            someArr2 = JsonSerializer.Deserialize<string[]>(_mockPipeline.LoginRequest.Parameters["someArr"]);
             someArr2.Should().Contain(new[] { "a", "c", "b" });
             someArr2.Length.Should().Be(3);
         }

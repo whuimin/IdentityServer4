@@ -6,12 +6,12 @@ using IdentityModel;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json.Nodes;
 using IdentityServer4.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -34,7 +34,7 @@ namespace IdentityServer4.Extensions
         /// </exception>
         public static JwtPayload CreateJwtPayload(this Token token, ISystemClock clock, IdentityServerOptions options, ILogger logger)
         {
-            var payload = new JwtPayload(
+            var payload = new CustomJwtPayload(
                 token.Issuer,
                 null,
                 null,
@@ -90,9 +90,9 @@ namespace IdentityServer4.Extensions
             // collection identity comparisons work for the anonymous type
             try
             {
-                var jsonTokens = jsonClaims.Select(x => new { x.Type, JsonValue = JRaw.Parse(x.Value) }).ToArray();
+                var jsonNodes = jsonClaims.Select(x => new { x.Type, JsonValue = JsonNode.Parse(x.Value) }).ToArray();
 
-                var jsonObjects = jsonTokens.Where(x => x.JsonValue.Type == JTokenType.Object).ToArray();
+                var jsonObjects = jsonNodes.Where(x => x.JsonValue is JsonObject).ToArray();
                 var jsonObjectGroups = jsonObjects.GroupBy(x => x.Type).ToArray();
                 foreach (var group in jsonObjectGroups)
                 {
@@ -113,7 +113,7 @@ namespace IdentityServer4.Extensions
                     }
                 }
 
-                var jsonArrays = jsonTokens.Where(x => x.JsonValue.Type == JTokenType.Array).ToArray();
+                var jsonArrays = jsonNodes.Where(x => x.JsonValue is JsonArray).ToArray();
                 var jsonArrayGroups = jsonArrays.GroupBy(x => x.Type).ToArray();
                 foreach (var group in jsonArrayGroups)
                 {
@@ -123,18 +123,17 @@ namespace IdentityServer4.Extensions
                             $"Can't add two claims where one is a JSON array and the other is not a JSON array ({group.Key})");
                     }
 
-                    var newArr = new List<JToken>();
-                    foreach (var arrays in group)
+                    var newJsonArray = new List<JsonNode>();
+                    foreach (var jsonNode in group)
                     {
-                        var arr = (JArray)arrays.JsonValue;
-                        newArr.AddRange(arr);
+                        newJsonArray.AddRange(jsonNode.JsonValue.AsArray());
                     }
 
                     // add just one array for the group/key/claim type
-                    payload.Add(group.Key, newArr.ToArray());
+                    payload.Add(group.Key, newJsonArray.ToArray());
                 }
 
-                var unsupportedJsonTokens = jsonTokens.Except(jsonObjects).Except(jsonArrays).ToArray();
+                var unsupportedJsonTokens = jsonNodes.Except(jsonObjects).Except(jsonArrays).ToArray();
                 var unsupportedJsonClaimTypes = unsupportedJsonTokens.Select(x => x.Type).Distinct().ToArray();
                 if (unsupportedJsonClaimTypes.Any())
                 {
