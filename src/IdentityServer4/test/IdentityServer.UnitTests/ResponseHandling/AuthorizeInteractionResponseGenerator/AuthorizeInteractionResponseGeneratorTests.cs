@@ -123,7 +123,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
                 Subject = new IdentityServerUser("123")
                 {
                     IdentityProvider = "local",
-                    AuthenticationTime = _clock.UtcNow.UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
+                    AuthenticationTime = _clock.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
                 }.CreatePrincipal(),
                 PromptModes = new[] { PromptModes.None }
             };
@@ -135,7 +135,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
         }
 
         [Fact]
-        public async Task locally_authenticated_user_but_client_does_not_allow_local_with_prompt_none_should_error()
+        public async Task Locally_authenticated_user_but_client_does_not_allow_local_with_prompt_none_should_error()
         {
             var request = new ValidatedAuthorizeRequest
             {

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
@@ -62,7 +62,7 @@ namespace IdentityServer.UnitTests.Cors
         [InlineData("/baz/quux")]
         [InlineData("/baz/quux/")]
         [Trait("Category", Category)]
-        public async Task valid_paths_should_call_policy_service(string path)
+        public async Task Valid_paths_should_call_policy_service(string path)
         {
             _allowedPaths.AddRange(new string[] {
                 "/foo",
@@ -76,7 +76,7 @@ namespace IdentityServer.UnitTests.Cors
             ctx.Request.Scheme = "https";
             ctx.Request.Host = new HostString("server");
             ctx.Request.Path = new PathString(path);
-            ctx.Request.Headers.Add("Origin", "http://notserver");
+            ctx.Request.Headers.Append("Origin", "http://notserver");
 
             var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
@@ -91,7 +91,7 @@ namespace IdentityServer.UnitTests.Cors
         [InlineData("/foo/xoxo")]
         [InlineData("/baz/quux/xoxo")]
         [Trait("Category", Category)]
-        public async Task invalid_paths_should_not_call_policy_service(string path)
+        public async Task Invalid_paths_should_not_call_policy_service(string path)
         {
             _allowedPaths.AddRange(new string[] {
                 "/foo",
@@ -104,7 +104,7 @@ namespace IdentityServer.UnitTests.Cors
             ctx.Request.Scheme = "https";
             ctx.Request.Host = new HostString("server");
             ctx.Request.Path = new PathString(path);
-            ctx.Request.Headers.Add("Origin", "http://notserver");
+            ctx.Request.Headers.Append("Origin", "http://notserver");
 
             var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
@@ -114,7 +114,7 @@ namespace IdentityServer.UnitTests.Cors
 
         [Fact]
         [Trait("Category", Category)]
-        public async Task different_policy_name_should_call_inner_policy_service()
+        public async Task Different_policy_name_should_call_inner_policy_service()
         {
             _allowedPaths.AddRange(new string[] {
                 "/foo",
@@ -127,7 +127,7 @@ namespace IdentityServer.UnitTests.Cors
             ctx.Request.Scheme = "https";
             ctx.Request.Host = new HostString("server");
             ctx.Request.Path = new PathString("/foo");
-            ctx.Request.Headers.Add("Origin", "http://notserver");
+            ctx.Request.Headers.Append("Origin", "http://notserver");
 
             var response = await _subject.GetPolicyAsync(ctx, "wrong_name");
 
@@ -137,7 +137,7 @@ namespace IdentityServer.UnitTests.Cors
 
         [Fact]
         [Trait("Category", Category)]
-        public async Task origin_same_as_server_should_not_call_policy()
+        public async Task Origin_same_as_server_should_not_call_policy()
         {
             _allowedPaths.AddRange(new string[] {
                 "/foo"
@@ -148,7 +148,7 @@ namespace IdentityServer.UnitTests.Cors
             ctx.Request.Scheme = "https";
             ctx.Request.Host = new HostString("server");
             ctx.Request.Path = new PathString("/foo");
-            ctx.Request.Headers.Add("Origin", "https://server");
+            ctx.Request.Headers.Append("Origin", "https://server");
 
             var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 
@@ -160,7 +160,7 @@ namespace IdentityServer.UnitTests.Cors
         [InlineData("https://notserver")]
         [InlineData("http://server")]
         [Trait("Category", Category)]
-        public async Task origin_not_same_as_server_should_call_policy(string origin)
+        public async Task Origin_not_same_as_server_should_call_policy(string origin)
         {
             _allowedPaths.AddRange(new string[] {
                 "/foo"
@@ -171,7 +171,7 @@ namespace IdentityServer.UnitTests.Cors
             ctx.Request.Scheme = "https";
             ctx.Request.Host = new HostString("server");
             ctx.Request.Path = new PathString("/foo");
-            ctx.Request.Headers.Add("Origin", origin);
+            ctx.Request.Headers.Append("Origin", origin);
 
             var response = await _subject.GetPolicyAsync(ctx, _options.Cors.CorsPolicyName);
 

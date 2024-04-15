@@ -180,7 +180,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
+            var values = introspectionResponse.Json?.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.String);
             values["iss"].ValueKind.Should().Be(JsonValueKind.String);
@@ -219,7 +219,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
+            var values = introspectionResponse.Json?.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.String);
             values["iss"].ValueKind.Should().Be(JsonValueKind.String);
@@ -258,7 +258,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
+            var values = introspectionResponse.Json?.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.Array);
 
@@ -303,7 +303,7 @@ namespace IdentityServer.IntegrationTests.Endpoints.Introspection
                 Token = tokenResponse.AccessToken
             });
 
-            var values = introspectionResponse.Json.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
+            var values = introspectionResponse.Json?.EnumerateObject().ToDictionary(je => je.Name, je => je.Value);
 
             values["aud"].ValueKind.Should().Be(JsonValueKind.String);
             values["iss"].ValueKind.Should().Be(JsonValueKind.String);

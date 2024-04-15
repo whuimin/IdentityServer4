@@ -304,7 +304,7 @@ namespace IdentityServer.IntegrationTests.Clients
 
         private Dictionary<string, object> GetFields(TokenResponse response)
         {
-            return response.Json.EnumerateObject().ToDictionary(je => je.Name, je => {
+            return response.Json?.EnumerateObject().ToDictionary(je => je.Name, je => {
                 object value;
                 switch (je.Value.ValueKind)
                 {

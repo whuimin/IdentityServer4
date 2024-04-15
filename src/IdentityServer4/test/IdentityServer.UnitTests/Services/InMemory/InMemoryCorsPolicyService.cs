@@ -25,7 +25,7 @@ namespace IdentityServer.UnitTests.Services.InMemory
 
         [Fact]
         [Trait("Category", Category)]
-        public void client_has_origin_should_allow_origin()
+        public async void Client_has_origin_should_allow_origin()
         {
             _clients.Add(new Client
             {
@@ -35,7 +35,7 @@ namespace IdentityServer.UnitTests.Services.InMemory
                 }
             });
 
-            _subject.IsOriginAllowedAsync("http://foo").Result.Should().BeTrue();
+            (await _subject.IsOriginAllowedAsync("http://foo")).Should().BeTrue();
         }
 
         [Theory]
@@ -43,7 +43,7 @@ namespace IdentityServer.UnitTests.Services.InMemory
         [InlineData("https://bar")]
         [InlineData("http://bar-baz")]
         [Trait("Category", Category)]
-        public void client_does_not_has_origin_should_not_allow_origin(string clientOrigin)
+        public async void Client_does_not_has_origin_should_not_allow_origin(string clientOrigin)
         {
             _clients.Add(new Client
             {
@@ -52,12 +52,12 @@ namespace IdentityServer.UnitTests.Services.InMemory
                     clientOrigin
                 }
             });
-            _subject.IsOriginAllowedAsync("http://bar").Result.Should().Be(false);
+            (await _subject.IsOriginAllowedAsync("http://bar")).Should().Be(false);
         }
 
         [Fact]
         [Trait("Category", Category)]
-        public void client_has_many_origins_and_origin_is_in_list_should_allow_origin()
+        public async void Client_has_many_origins_and_origin_is_in_list_should_allow_origin()
         {
             _clients.Add(new Client
             {
@@ -68,12 +68,12 @@ namespace IdentityServer.UnitTests.Services.InMemory
                     "http://baz"
                 }
             });
-            _subject.IsOriginAllowedAsync("http://bar").Result.Should().Be(true);
+            (await _subject.IsOriginAllowedAsync("http://bar")).Should().Be(true);
         }
 
         [Fact]
         [Trait("Category", Category)]
-        public void client_has_many_origins_and_origin_is_in_not_list_should_not_allow_origin()
+        public async void Client_has_many_origins_and_origin_is_in_not_list_should_not_allow_origin()
         {
             _clients.Add(new Client
             {
@@ -84,12 +84,12 @@ namespace IdentityServer.UnitTests.Services.InMemory
                     "http://baz"
                 }
             });
-            _subject.IsOriginAllowedAsync("http://quux").Result.Should().Be(false);
+            (await _subject.IsOriginAllowedAsync("http://quux")).Should().Be(false);
         }
 
         [Fact]
         [Trait("Category", Category)]
-        public void many_clients_have_same_origins_should_allow_origin()
+        public async void Many_clients_have_same_origins_should_allow_origin()
         {
             _clients.AddRange(new Client[] {
                 new Client
@@ -107,12 +107,12 @@ namespace IdentityServer.UnitTests.Services.InMemory
                     }
                 }
             });
-            _subject.IsOriginAllowedAsync("http://foo").Result.Should().BeTrue();
+            (await _subject.IsOriginAllowedAsync("http://foo")).Should().BeTrue();
         }
 
         [Fact]
         [Trait("Category", Category)]
-        public void handle_invalid_cors_origin_format_exception()
+        public async void Handle_invalid_cors_origin_format_exception()
         {
             _clients.AddRange(new Client[] {
                 new Client
@@ -132,7 +132,7 @@ namespace IdentityServer.UnitTests.Services.InMemory
                     }
                 }
             });
-            _subject.IsOriginAllowedAsync("http://bar").Result.Should().BeTrue();
+            (await _subject.IsOriginAllowedAsync("http://bar")).Should().BeTrue();
         }
     }
 }

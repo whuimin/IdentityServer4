@@ -168,7 +168,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
                 Subject = new IdentityServerUser("123")
                 {
                     IdentityProvider = "local",
-                    AuthenticationTime = _clock.UtcNow.UtcDateTime.Subtract(TimeSpan.FromSeconds(10))
+                    AuthenticationTime = _clock.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromSeconds(10))
                 }.CreatePrincipal()
             };
 
@@ -190,7 +190,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
                 Subject = new IdentityServerUser("123")
                 {
                     IdentityProvider = "local",
-                    AuthenticationTime = _clock.UtcNow.UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
+                    AuthenticationTime = _clock.GetUtcNow().UtcDateTime.Subtract(TimeSpan.FromSeconds(3700))
                 }.CreatePrincipal()
             };
 
@@ -200,7 +200,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
         }
 
         [Fact]
-        public async Task locally_authenticated_user_but_client_does_not_allow_local_should_sign_in()
+        public async Task Locally_authenticated_user_but_client_does_not_allow_local_should_sign_in()
         {
             var request = new ValidatedAuthorizeRequest
             {
@@ -221,7 +221,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
         }
 
         [Fact]
-        public async Task prompt_login_should_sign_in()
+        public async Task Prompt_login_should_sign_in()
         {
             var request = new ValidatedAuthorizeRequest
             {
@@ -237,7 +237,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
         }
 
         [Fact]
-        public async Task prompt_select_account_should_sign_in()
+        public async Task Prompt_select_account_should_sign_in()
         {
             var request = new ValidatedAuthorizeRequest
             {
@@ -253,7 +253,7 @@ namespace IdentityServer.UnitTests.ResponseHandling.AuthorizeInteractionResponse
         }
 
         [Fact]
-        public async Task prompt_for_signin_should_remove_prompt_from_raw_url()
+        public async Task Prompt_for_signin_should_remove_prompt_from_raw_url()
         {
             var request = new ValidatedAuthorizeRequest
             {

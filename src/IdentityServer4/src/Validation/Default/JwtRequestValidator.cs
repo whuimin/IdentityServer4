@@ -205,10 +205,13 @@ namespace IdentityServer4.Validation
                         case "String":
                             payload.Add(key, value.ToString());
                             break;
-                        case "JObject":
-                        case "JArray":
-                            var jsonNode = JsonNode.Parse(value.ToString());
-                            payload.Add(key, jsonNode.ToJsonString(new JsonSerializerOptions() { WriteIndented = false }));
+                        case "JsonElement":
+                            var jsonElement = value as JsonElement?;
+                            if (jsonElement != null)
+                            {
+                                var jsonNode = JsonNode.Parse(value.ToString());
+                                payload.Add(key, jsonNode.ToJsonString(new JsonSerializerOptions() { WriteIndented = false }));
+                            }
                             break;
                     }
                 }

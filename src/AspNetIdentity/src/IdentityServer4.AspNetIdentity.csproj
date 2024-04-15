@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>IdentityServer4.AspNetIdentity</PackageId>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFramework>net8.0</TargetFramework>
     
     <Description>ASP.NET Core Identity Integration for IdentityServer4</Description>
     <Authors>Brock Allen;Dominick Baier</Authors>
@@ -42,6 +42,10 @@
     <PackageReference Include="IdentityServer4" />
     
     <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <PackageReference Update="MinVer" />
   </ItemGroup>
 
 </Project>

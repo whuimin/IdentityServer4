@@ -1,4 +1,4 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
+// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
@@ -14,6 +14,7 @@ using IdentityServer4.Configuration;
 using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Xunit;
 
 namespace IdentityServer.UnitTests.Services.Default
@@ -148,7 +149,7 @@ namespace IdentityServer.UnitTests.Services.Default
             _mockHttpContext.HttpContext.Response.Headers.Clear();
 
             string cookie = cookieContainer.GetCookieHeader(new Uri("http://server"));
-            _mockHttpContext.HttpContext.Request.Headers.Add("Cookie", cookie);
+            _mockHttpContext.HttpContext.Request.Headers.Append("Cookie", cookie);
 
             await _subject.RemoveSessionIdCookieAsync();
 
@@ -177,7 +178,7 @@ namespace IdentityServer.UnitTests.Services.Default
         }
 
         [Fact]
-        public async Task adding_client_should_set_item_in_cookie_properties()
+        public async Task Adding_client_should_set_item_in_cookie_properties()
         {
             _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
@@ -187,7 +188,7 @@ namespace IdentityServer.UnitTests.Services.Default
         }
 
         [Fact]
-        public async Task when_authenticated_GetIdentityServerUserAsync_should_should_return_authenticated_user()
+        public async Task When_authenticated_GetIdentityServerUserAsync_should_should_return_authenticated_user()
         {
             _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
@@ -196,14 +197,14 @@ namespace IdentityServer.UnitTests.Services.Default
         }
 
         [Fact]
-        public async Task when_anonymous_GetIdentityServerUserAsync_should_should_return_null()
+        public async Task When_anonymous_GetIdentityServerUserAsync_should_should_return_null()
         {
             var user = await _subject.GetUserAsync();
             user.Should().BeNull();
         }
 
         [Fact]
-        public async Task corrupt_properties_entry_should_clear_entry()
+        public async Task Corrupt_properties_entry_should_clear_entry()
         {
             _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
@@ -217,7 +218,7 @@ namespace IdentityServer.UnitTests.Services.Default
         }
 
         [Fact]
-        public async Task adding_client_should_be_able_to_read_client()
+        public async Task Adding_client_should_be_able_to_read_client()
         {
             _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
@@ -227,7 +228,7 @@ namespace IdentityServer.UnitTests.Services.Default
         }
 
         [Fact]
-        public async Task adding_clients_should_be_able_to_read_clients()
+        public async Task Adding_clients_should_be_able_to_read_clients()
         {
             _mockAuthenticationHandler.Result = AuthenticateResult.Success(new AuthenticationTicket(_user, _props, "scheme"));
 
